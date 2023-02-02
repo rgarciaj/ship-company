@@ -23,13 +23,15 @@
             [title]="marker.title"
             [options]="marker.options"
             [icon]="marker.icon"
-            (mapClick)="openInfo(markerElem, marker.title, marker.info)"
+            (mapClick)="openInfo(markerElem, marker.title, marker.description, marker.destination.lat, marker.destination.lng, marker.direction)"
         >
         </map-marker>
 
         <map-info-window>
-          <span class="text-3xl">{{ markerInfoContent.title }}</span> <br>
-          <span>{{ markerInfoContent.info }}</span>
+          <div class="text-3xl">{{ markerInfoContent.title }}</div>
+          <div class="text-xl">{{ markerInfoContent.description }}</div>
+          <div>Destino: lat {{ markerInfoContent.lat }}, lng {{ markerInfoContent.lng }}</div>
+          <div>Dirección: {{ markerInfoContent.direction }}</div>
         </map-info-window>
       </google-map>
       
@@ -40,8 +42,106 @@
       
     </div>
   </div>
+
   <div class="p-5 bg-sky-50 basis-1/4">
     <h1 class="font-bold text-1xl">Administración de embarcaciones</h1>
+
+    <button (click)="btnAddShipForm()" class="px-4 py-1 mt-4 text-sm text-white bg-blue-400 rounded">Agregar Embarcación</button>
+
+    <ng-container *ngIf="showFrm">
+      <form #form="ngForm" id="frm" class="mt-3 bg-white border-b border-gray-200 shadow">
+        <div class="px-4 py-2 text-xs font-bold text-gray-500 bg-gray-50">
+          {{formTitle}}
+        </div>
+        <div class="px-4 pb-4">
+          <label for="name" class="text-xs">Nombre:</label>
+          <input id="name" type="text" class="w-full p-2 text-xs border border-gray-300 rounded" placeholder="Nombre de la embarcación" [(ngModel)]="frmName" name="name">
+        </div>
+        <div class="px-4 pb-4">
+          <label for="description" class="text-xs">Descripción:</label>
+          <input id="description" type="text" class="w-full p-2 text-xs border border-gray-300 rounded" placeholder="Descripción util sobre la embarcación" [(ngModel)]="frmDescription" name="description">
+        </div>
+        <div class="px-4 pb-4">
+          <label for="latIni" class="text-xs">Latitud inicial:</label>
+          <input id="latIni" type="text" class="w-full p-2 text-xs border border-gray-300 rounded" placeholder="Latitud desde donde inicia la embarcación inicia el trayecto" [(ngModel)]="frmLatIni" name="latIni">
+        </div>
+        <div class="px-4 pb-4">
+          <label for="lngIni" class="text-xs">Longitud inicial:</label>
+          <input id="lngIni" type="text" class="w-full p-2 text-xs border border-gray-300 rounded" placeholder="Longitud desde donde inicia la embarcación inicia el trayecto" [(ngModel)]="frmLngIni" name="lngIni">
+        </div>
+        <div class="px-4 pb-4">
+          <label for="latDest" class="text-xs">Latitud del destino:</label>
+          <input id="latDest" type="text" class="w-full p-2 text-xs border border-gray-300 rounded" placeholder="Latitud hacia donde va la embarcación" [(ngModel)]="frmLatDest" name="latDest">
+        </div>
+        <div class="px-4 pb-4">
+          <label for="lngDest" class="text-xs">Longitud del destino:</label>
+          <input id="lngDest" type="text" class="w-full p-2 text-xs border border-gray-300 rounded" placeholder="Longitud hacia donde va la embarcación" [(ngModel)]="frmLngDest" name="lngDest">
+        </div>
+        <div class="px-4 pb-4">
+          <label for="direction" class="text-xs">Dirección:</label>
+          <select id="direction" class="w-full p-2 text-xs border border-gray-300 rounded" [(ngModel)]="frmDirection" name="direction">
+            <option value=""></option>
+            <option value="N">Norte</option>
+            <option value="S">Sur</option>
+            <option value="E">Este</option>
+            <option value="O">Oeste</option>
+            <option value="NE">Noreste</option>
+            <option value="NO">Noroeste</option>
+            <option value="SE">Sureste</option>
+            <option value="SO">Suroeste</option>
+          </select>
+        </div>
+        <input type="hidden" id="id" name="id" [(ngModel)]="frmId">
+        <input type="hidden" id="frmType" name="frmType" value="{{formType}}">
+        <button (click)="frmSubmit(form.value, $event)" class="px-4 py-1 mx-4 mb-4 text-sm text-white bg-blue-400 rounded">
+          {{formBtn}}
+        </button>
+        <button (click)="toggleForm()" class="px-4 py-1 mb-4 ml-2 text-sm text-white bg-blue-400 rounded">
+          Cerrar
+        </button>
+      </form>
+    </ng-container>
+
+    <table class="mt-3 border-b border-gray-200 shadow">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-4 py-2 text-xs text-gray-500">
+            Nombre
+          </th>
+          <th class="px-4 py-2 text-xs text-gray-500">
+            Lat, Long
+          </th>
+          <th class="px-4 py-2 text-xs text-gray-500">
+            Dirección
+          </th>
+          <th class="px-4 py-2 text-xs text-gray-500">
+
+          </th>
+        </tr>
+      </thead>
+      <tbody class="bg-white">
+        <tr class="whitespace-nowrap" *ngFor="let ship of markers">
+          <td class="px-4 py-4">
+            <span class="text-sm text-gray-900">
+              {{ ship.title }}
+            </span>
+          </td>
+          <td class="px-4 py-4">
+            <div class="text-sm text-gray-500">
+              {{ ship.position.lat }}, {{ ship.position.lng }}
+            </div>
+          </td>
+          <td class="px-4 py-4 text-sm text-center text-gray-500">
+            {{ ship.direction }}
+          </td>
+          <td class="px-4 py-4">
+            <a (click)="btnEditForm(ship.id)" class="px-4 py-1 text-sm text-white bg-blue-400 rounded cursor-pointer">Editar</a>
+            <a (click)="btnDeleteShip(ship.id)" class="px-4 py-1 ml-1 text-sm text-white bg-red-400 rounded cursor-pointer">Eliminar</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
   </div>
 </div>
 

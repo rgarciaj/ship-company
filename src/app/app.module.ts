@@ -3,6 +3,7 @@ import { GoogleMapsModule } from '@angular/google-maps';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule, HttpClientJsonpModule } from '@angular/common/http';
 import { BrowserModule } from '@angular/platform-browser';
+import { FormsModule } from '@angular/forms';
 import { ToastrModule } from 'ngx-toastr';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -21,6 +22,7 @@ import { MapComponent } from './map/map.component';
     HttpClientJsonpModule,
     CommonModule,
     AppRoutingModule,
+    FormsModule,
     ToastrModule.forRoot({
       preventDuplicates: false,
       progressBar: true,
